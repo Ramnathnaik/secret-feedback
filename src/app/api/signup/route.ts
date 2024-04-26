@@ -1,3 +1,4 @@
+import { sendResponse } from "@/helper/reponse";
 import sendVerificationEmail from "@/helper/sendVerificationEmail";
 import dbConnect from "@/lib/dbConnect";
 import UserModel from "@/model/User.model";
@@ -15,10 +16,7 @@ export async function POST(request: Request) {
     });
 
     if (existingUser) {
-      return Response.json(
-        { success: false, message: "Username already exists" },
-        { status: 400 }
-      );
+      return sendResponse("Username already exists", false, 400);
     }
 
     const userWithExistingEmail = await UserModel.findOne({
@@ -31,10 +29,7 @@ export async function POST(request: Request) {
 
     if (userWithExistingEmail) {
       if (userWithExistingEmail.isVerified) {
-        return Response.json(
-          { success: false, message: "Email already exists" },
-          { status: 400 }
-        );
+        return sendResponse("Email already exists", false, 400);
       } else {
         const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -69,30 +64,20 @@ export async function POST(request: Request) {
     );
 
     if (!emailResponse.success) {
-      return Response.json(
-        {
-          success: false,
-          message: emailResponse.message,
-        },
-        { status: 500 }
-      );
+      return sendResponse(emailResponse.message, false, 500);
     }
 
-    return Response.json(
-      {
-        success: true,
-        message: "User registered successfully. Please verify your email",
-      },
-      { status: 201 }
+    return sendResponse(
+      "User registered successfully. Please verify your email",
+      true,
+      201
     );
   } catch (error) {
     console.error(`User not saved due to error: ${error}`);
-    return Response.json(
-      {
-        success: false,
-        message: "Unable to create user. Please try after sometime",
-      },
-      { status: 500 }
+    return sendResponse(
+      "Unable to create user. Please try after sometime",
+      false,
+      500
     );
   }
 }
