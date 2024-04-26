@@ -2,6 +2,7 @@ import { z } from "zod";
 import { usernameValidation } from "../../../schemas/signUpSchema";
 import dbConnect from "@/lib/dbConnect";
 import UserModel from "@/model/User.model";
+import { sendResponse } from "@/helper/reponse";
 
 const usernameQuerySchema = z.object({
   username: usernameValidation,
@@ -18,15 +19,12 @@ export async function GET(request: Request) {
   if (!result.success) {
     const usernameErrors = result.error.format().username?._errors || [];
 
-    return Response.json(
-      {
-        success: false,
-        message:
-          usernameErrors.length > 0
-            ? usernameErrors.join(", ")
-            : "Invalid query parameters",
-      },
-      { status: 400 }
+    return sendResponse(
+      usernameErrors.length > 0
+        ? usernameErrors.join(", ")
+        : "Invalid query parameters",
+      false,
+      400
     );
   }
 
@@ -41,26 +39,11 @@ export async function GET(request: Request) {
     });
 
     if (existingUser) {
-      return Response.json(
-        {
-          status: false,
-          message: "Username already taken",
-        },
-        { status: 400 }
-      );
+      return sendResponse("Username already taken", false, 400);
     }
 
-    return Response.json(
-      {
-        success: true,
-        message: "Username is unique",
-      },
-      { status: 200 }
-    );
+    return sendResponse("Username is unique", true, 200, "success");
   } catch (error) {
-    return Response.json(
-      { success: false, message: "Internal server error" },
-      { status: 500 }
-    );
+    return sendResponse("Internal server error", false, 500);
   }
 }

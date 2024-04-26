@@ -1,3 +1,4 @@
+import { sendResponse } from "@/helper/reponse";
 import dbConnect from "@/lib/dbConnect";
 import UserModel from "@/model/User.model";
 import { verifySchema } from "@/schemas/verifySchema";
@@ -11,15 +12,12 @@ export async function POST(request: Request) {
   if (!result.success) {
     const codeVerificationErrors = result.error.format().code?._errors || [];
 
-    return Response.json(
-      {
-        success: false,
-        message:
-          codeVerificationErrors.length > 0
-            ? codeVerificationErrors.join(", ")
-            : "Invaild code",
-      },
-      { status: 400 }
+    return sendResponse(
+      codeVerificationErrors.length > 0
+        ? codeVerificationErrors.join(", ")
+        : "Invaild code",
+      false,
+      400
     );
   }
 
@@ -33,56 +31,29 @@ export async function POST(request: Request) {
     });
 
     if (!user) {
-      return Response.json(
-        {
-          success: false,
-          message: "User not found",
-        },
-        { status: 400 }
-      );
+      return sendResponse("User not found", false, 400);
     }
 
     const isCodeValid = user.verifyCode === code;
     const codeExpiryTime = new Date(user.verifyCodeExpiry) > new Date();
 
     if (!isCodeValid) {
-      return Response.json(
-        {
-          success: false,
-          message: "Code not valid",
-        },
-        { status: 400 }
-      );
+      return sendResponse("Code not vaild", false, 400);
     }
     if (!codeExpiryTime) {
-      return Response.json(
-        {
-          success: false,
-          message:
-            "Verification code expired. Please signup again to generate new code.",
-        },
-        { status: 400 }
+      return sendResponse(
+        "Verification code expired. Please signup again to generate new code.",
+        false,
+        400
       );
     }
 
     if (codeExpiryTime && isCodeValid) {
       user.isVerified = true;
       await user.save();
-      return Response.json(
-        {
-          success: true,
-          message: "User verified successfully",
-        },
-        { status: 200 }
-      );
+      return sendResponse("User verified successfully", true, 200);
     }
   } catch (error) {
-    return Response.json(
-      {
-        success: false,
-        message: "Unable to verify code",
-      },
-      { status: 500 }
-    );
+    return sendResponse("Unable to verify code", false);
   }
 }
