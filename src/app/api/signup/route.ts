@@ -46,14 +46,14 @@ export async function POST(request: Request) {
     } else {
       const hashedPassword = await bcrypt.hash(password, 10);
       const expiryDate = new Date();
-      const verifyCodeExpiry = expiryDate.getHours() + 1;
+      expiryDate.setHours(expiryDate.getHours() + 1);
 
       const newUser = new UserModel({
         username,
         password: hashedPassword,
         email,
         verifyCode,
-        verifyCodeExpiry,
+        verifyCodeExpiry: expiryDate,
         isVerified: false,
         isAcceptingMessage: true,
         messages: [],
