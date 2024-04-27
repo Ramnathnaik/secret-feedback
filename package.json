@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.8.0",
+    "ai": "^3.0.34",
     "bcrypt": "^5.1.1",
     "mongoose": "^8.3.2",
     "next": "14.2.3",
