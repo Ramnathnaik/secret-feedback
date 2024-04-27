@@ -1,11 +1,11 @@
 import { sendResponse } from "@/helper/reponse";
 import dbConnect from "@/lib/dbConnect";
 import UserModel from "@/model/User.model";
-import { verifySchema } from "@/schemas/verifySchema";
+import { verifyCodeSchema } from "@/schemas/verifyCodeSchema";
 export async function POST(request: Request) {
   const { username, code } = await request.json();
 
-  const result = verifySchema.safeParse({
+  const result = verifyCodeSchema.safeParse({
     code,
   });
 
